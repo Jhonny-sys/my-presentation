@@ -6,7 +6,7 @@ import {
   REFRESH_TOKEN_COOKIE,
 } from "@/lib/admin-auth.constants";
 
-export async function POST() {
+export async function POST(request: Request) {
   const store = await cookies();
   const refreshToken = store.get(REFRESH_TOKEN_COOKIE)?.value;
 
@@ -19,7 +19,7 @@ export async function POST() {
     });
   }
 
-  const response = NextResponse.json({ ok: true });
+  const response = NextResponse.redirect(new URL("/login", request.url), 303);
   response.cookies.set(ACCESS_TOKEN_COOKIE, "", { httpOnly: true, maxAge: 0, path: "/" });
   response.cookies.set(REFRESH_TOKEN_COOKIE, "", { httpOnly: true, maxAge: 0, path: "/" });
   return response;
