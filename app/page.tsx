@@ -1,35 +1,52 @@
 import { LandingShell } from "@/components/landing/LandingShell";
 import { getAssetUrls } from "@/lib/api/config";
+import { SUPPORTED_LANGUAGES, type LangCode } from "@/lib/i18n/landing";
 import { fetchI18nBundle, fetchPortfolio } from "@/lib/api/server-client";
 
 export const dynamic = "force-dynamic";
 
+async function loadMessagesByLang() {
+  const entries = await Promise.all(
+    SUPPORTED_LANGUAGES.map(async (item) => {
+      try {
+        const bundle = await fetchI18nBundle(item.code);
+        return [item.code, bundle.messages] as const;
+      } catch {
+        return [item.code, {}] as const;
+      }
+    }),
+  );
+
+  return Object.fromEntries(entries) as Record<LangCode, Record<string, string>>;
+}
+
 export default async function HomePage() {
   const assets = getAssetUrls();
   let portfolio = null;
-  let messages: Record<string, string> = {};
+  let messagesByLang: Record<LangCode, Record<string, string>> = {
+    es: {},
+    en: {},
+    pt: {},
+  };
   let error = "";
 
   try {
-    const [portfolioData, bundle] = await Promise.all([
+    const [portfolioData, bundles] = await Promise.all([
       fetchPortfolio(),
-      fetchI18nBundle("es"),
+      loadMessagesByLang(),
     ]);
     portfolio = portfolioData;
-    messages = bundle.messages;
+    messagesByLang = bundles;
   } catch {
     error = "No se pudo cargar el contenido. Verifica que la API esté activa.";
   }
 
   const profile = portfolio?.profile;
-  const headline =
-    messages["profile.headline"] ?? profile?.headline ?? "Desarrollador";
-  const bio = messages["profile.bio"] ?? profile?.bio ?? "";
   const name = profile?.full_name ?? "Jhonny Alexander Fonseca";
 
   const imageUrl = assets.image || profile?.avatar_url || "";
   const cvUrl = assets.cv || profile?.resume_url || "";
-  const letterUrl = assets.letter;
+  const letterUrl = profile?.letter_url || assets.letter;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#050508] text-white">
@@ -39,10 +56,8 @@ export default async function HomePage() {
       <div className="relative mx-auto flex min-h-screen max-w-7xl flex-col px-6 pb-10 pt-8">
         <LandingShell
           portfolio={portfolio}
-          messages={messages}
+          messagesByLang={messagesByLang}
           name={name}
-          headline={headline}
-          bio={bio}
           error={error}
           cvUrl={cvUrl}
           letterUrl={letterUrl}

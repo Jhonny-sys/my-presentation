@@ -65,6 +65,27 @@ export async function getAccessToken(): Promise<string> {
   return tokenCache.accessToken;
 }
 
+async function publicApiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${getApiBaseUrl()}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...init?.headers,
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error ${response.status}: ${path}`);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  return response.json();
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const token = await getAccessToken();
   const response = await fetch(`${getApiBaseUrl()}${path}`, {
@@ -89,11 +110,11 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export async function fetchPortfolio(): Promise<Portfolio> {
-  return apiFetch<Portfolio>("/portfolio");
+  return publicApiFetch<Portfolio>("/portfolio");
 }
 
 export async function fetchI18nBundle(lang: string): Promise<I18nBundle> {
-  return apiFetch<I18nBundle>(`/i18n/bundle/${lang}`);
+  return publicApiFetch<I18nBundle>(`/i18n/bundle/${lang}`);
 }
 
 export async function fetchI18nEntries(namespace?: string): Promise<I18nEntry[]> {

@@ -7,7 +7,6 @@ export type DbOrbId = "profile" | "experience" | "studies" | "technologies";
 export type DbOrbConfig = {
   id: DbOrbId;
   label: string;
-  subtitle: string;
   accent: string;
   delay?: string;
 };
@@ -16,7 +15,7 @@ type OrbProps = DbOrbConfig & {
   onClick: (id: DbOrbId) => void;
 };
 
-function Orb({ id, label, subtitle, accent, delay = "0s", onClick }: OrbProps) {
+function Orb({ id, label, accent, delay = "0s", onClick }: OrbProps) {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -50,9 +49,8 @@ function Orb({ id, label, subtitle, accent, delay = "0s", onClick }: OrbProps) {
           >
             {label.charAt(0)}
           </div>
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-4 pb-5 pt-10 text-center">
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-4 pb-5 pt-8 text-center">
             <p className="text-sm font-semibold tracking-wide text-white">{label}</p>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-white/60">{subtitle}</p>
           </div>
         </div>
       </div>

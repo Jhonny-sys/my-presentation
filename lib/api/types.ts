@@ -14,6 +14,7 @@ export type PersonalInfo = {
   location?: string | null;
   avatar_url?: string | null;
   resume_url?: string | null;
+  letter_url?: string | null;
   social_links: SocialLinks;
   available_for_work: boolean;
 };

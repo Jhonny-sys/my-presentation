@@ -46,8 +46,19 @@ export function FileUploadField({
         className="block w-full text-sm text-white/70 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-400/20 file:px-3 file:py-2 file:text-cyan-200"
       />
       {previewUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={previewUrl} alt="" className="h-16 w-16 rounded-lg object-cover" />
+        previewUrl.toLowerCase().includes(".pdf") ? (
+          <a
+            href={previewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex text-sm text-cyan-300 underline hover:text-cyan-200"
+          >
+            Ver archivo PDF
+          </a>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={previewUrl} alt="" className="h-16 w-16 rounded-lg object-cover" />
+        )
       )}
     </div>
   );

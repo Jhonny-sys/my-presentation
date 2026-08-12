@@ -46,6 +46,9 @@ export function AdminPanel({ initialPortfolio }: Props) {
   const [uploading, setUploading] = useState(false);
 
   const [bio, setBio] = useState(portfolio.profile?.bio ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(portfolio.profile?.avatar_url ?? "");
+  const [resumeUrl, setResumeUrl] = useState(portfolio.profile?.resume_url ?? "");
+  const [letterUrl, setLetterUrl] = useState(portfolio.profile?.letter_url ?? "");
   const [expForm, setExpForm] = useState(emptyExperience);
   const [editingExpId, setEditingExpId] = useState<string | null>(null);
   const [studyForm, setStudyForm] = useState(emptyStudy);
@@ -56,12 +59,19 @@ export function AdminPanel({ initialPortfolio }: Props) {
   const currentSection = ADMIN_SECTIONS.find((item) => item.id === section)!;
 
   async function saveProfile() {
-    if (!bio.trim()) return;
     setLoading(true);
     setStatus("");
     try {
-      const profile = await adminApi.saveProfile(bio.trim());
+      const profile = await adminApi.saveProfile({
+        bio,
+        avatar_url: avatarUrl || null,
+        resume_url: resumeUrl || null,
+        letter_url: letterUrl || null,
+      });
       setPortfolio((prev) => ({ ...prev, profile }));
+      setAvatarUrl(profile.avatar_url ?? "");
+      setResumeUrl(profile.resume_url ?? "");
+      setLetterUrl(profile.letter_url ?? "");
       setStatus("Perfil guardado");
     } catch {
       setStatus("Error al guardar perfil");
@@ -313,6 +323,36 @@ export function AdminPanel({ initialPortfolio }: Props) {
                 placeholder="Descripción profesional..."
               />
             </Field>
+            <FileUploadField
+              label="Foto de perfil"
+              accept="image/*"
+              previewUrl={avatarUrl}
+              uploading={uploading}
+              onUploadStart={() => setUploading(true)}
+              onUploadEnd={() => setUploading(false)}
+              upload={adminApi.uploadFile}
+              onUploaded={setAvatarUrl}
+            />
+            <FileUploadField
+              label="Hoja de vida (CV)"
+              accept="application/pdf,image/*"
+              previewUrl={resumeUrl}
+              uploading={uploading}
+              onUploadStart={() => setUploading(true)}
+              onUploadEnd={() => setUploading(false)}
+              upload={adminApi.uploadFile}
+              onUploaded={setResumeUrl}
+            />
+            <FileUploadField
+              label="Carta de presentación"
+              accept="application/pdf,image/*"
+              previewUrl={letterUrl}
+              uploading={uploading}
+              onUploadStart={() => setUploading(true)}
+              onUploadEnd={() => setUploading(false)}
+              upload={adminApi.uploadFile}
+              onUploaded={setLetterUrl}
+            />
             <button
               type="button"
               onClick={saveProfile}

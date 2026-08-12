@@ -29,10 +29,15 @@ export async function uploadFile(file: File): Promise<string> {
   return data.files[0]?.url ?? "";
 }
 
-export async function saveProfile(bio: string) {
+export async function saveProfile(body: {
+  bio?: string;
+  avatar_url?: string | null;
+  resume_url?: string | null;
+  letter_url?: string | null;
+}) {
   return api<PersonalInfo>("/api/admin/profile", {
     method: "PUT",
-    body: JSON.stringify({ bio }),
+    body: JSON.stringify(body),
   });
 }
 

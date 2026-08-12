@@ -39,7 +39,6 @@ export function SectionContent({
   if (section === "profile") {
     return (
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-400/70">personal_info</p>
         <h2 className="text-2xl font-bold text-white">{name}</h2>
         <p className="text-lg text-cyan-200">{headline}</p>
         <p className="leading-7 text-white/70">{bio || profile?.bio || "Sin descripción aún."}</p>
@@ -50,7 +49,6 @@ export function SectionContent({
   if (section === "experience") {
     return (
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.3em] text-emerald-400/70">experience</p>
         <h2 className="text-2xl font-bold text-white">
           {t(messages, "section.experience", "Experiencia")}
         </h2>
@@ -98,7 +96,6 @@ export function SectionContent({
   if (section === "studies") {
     return (
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.3em] text-indigo-400/70">studies</p>
         <h2 className="text-2xl font-bold text-white">
           {t(messages, "section.studies", "Estudios")}
         </h2>
@@ -141,7 +138,6 @@ export function SectionContent({
 
   return (
     <div className="space-y-4">
-      <p className="text-xs uppercase tracking-[0.3em] text-pink-400/70">technologies</p>
       <h2 className="text-2xl font-bold text-white">
         {t(messages, "section.technologies", "Tecnologías")}
       </h2>

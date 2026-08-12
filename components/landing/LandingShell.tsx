@@ -1,18 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Portfolio } from "@/lib/api/types";
+import { LanguageSwitcher } from "@/components/landing/LanguageSwitcher";
 import { ProfileAssets } from "@/components/landing/ProfileAssets";
 import { SectionContent } from "@/components/landing/SectionContent";
 import { SectionModal } from "@/components/landing/SectionModal";
 import { OrbField, type DbOrbConfig, type DbOrbId } from "@/components/orbs/OrbField";
+import { orbLabel, localizedBio, localizedHeadline, type LangCode } from "@/lib/i18n/landing";
 
 type Props = {
   portfolio: Portfolio | null;
-  messages: Record<string, string>;
+  messagesByLang: Record<LangCode, Record<string, string>>;
+  defaultLang?: LangCode;
   name: string;
-  headline: string;
-  bio: string;
   error: string;
   cvUrl: string;
   letterUrl: string;
@@ -21,47 +22,59 @@ type Props = {
 
 export function LandingShell({
   portfolio,
-  messages,
+  messagesByLang,
+  defaultLang = "es",
   name,
-  headline,
-  bio,
   error,
   cvUrl,
   letterUrl,
   imageUrl,
 }: Props) {
+  const [lang, setLang] = useState<LangCode>(defaultLang);
   const [activeOrb, setActiveOrb] = useState<DbOrbId | null>(null);
 
-  const dbOrbs: DbOrbConfig[] = [
-    {
-      id: "profile",
-      label: "Perfil",
-      subtitle: "personal_info",
-      accent: "#22d3ee",
-      delay: "0s",
-    },
-    {
-      id: "experience",
-      label: "Experiencia",
-      subtitle: `experience · ${portfolio?.experience.length ?? 0}`,
-      accent: "#34d399",
-      delay: "0.2s",
-    },
-    {
-      id: "studies",
-      label: "Estudios",
-      subtitle: `studies · ${portfolio?.studies.length ?? 0}`,
-      accent: "#818cf8",
-      delay: "0.4s",
-    },
-    {
-      id: "technologies",
-      label: "Stack",
-      subtitle: `technologies · ${portfolio?.technologies.length ?? 0}`,
-      accent: "#f472b6",
-      delay: "0.6s",
-    },
-  ];
+  const messages = messagesByLang[lang] ?? messagesByLang.es;
+  const profile = portfolio?.profile;
+
+  const headline = useMemo(
+    () => localizedHeadline(messages, lang, profile?.headline),
+    [messages, lang, profile?.headline],
+  );
+
+  const bio = useMemo(
+    () => localizedBio(messages, lang, profile?.bio),
+    [messages, lang, profile?.bio],
+  );
+
+  const dbOrbs: DbOrbConfig[] = useMemo(
+    () => [
+      {
+        id: "profile",
+        label: orbLabel(lang, "profile", messages),
+        accent: "#22d3ee",
+        delay: "0s",
+      },
+      {
+        id: "experience",
+        label: orbLabel(lang, "experience", messages),
+        accent: "#34d399",
+        delay: "0.2s",
+      },
+      {
+        id: "studies",
+        label: orbLabel(lang, "studies", messages),
+        accent: "#818cf8",
+        delay: "0.4s",
+      },
+      {
+        id: "technologies",
+        label: orbLabel(lang, "technologies", messages),
+        accent: "#f472b6",
+        delay: "0.6s",
+      },
+    ],
+    [lang, messages],
+  );
 
   const activeConfig = dbOrbs.find((orb) => orb.id === activeOrb);
 
@@ -69,12 +82,15 @@ export function LandingShell({
     <>
       <header className="flex flex-wrap items-center justify-between gap-4">
         <p className="text-sm font-semibold tracking-[0.35em] text-cyan-300/80">JHONNY SYS</p>
-        <ProfileAssets
-          cvUrl={cvUrl}
-          letterUrl={letterUrl}
-          imageUrl={imageUrl}
-          name={name}
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <LanguageSwitcher lang={lang} onChange={setLang} />
+          <ProfileAssets
+            cvUrl={cvUrl}
+            letterUrl={letterUrl}
+            imageUrl={imageUrl}
+            name={name}
+          />
+        </div>
       </header>
 
       <section className="grid flex-1 items-center gap-12 py-12 lg:grid-cols-[1.1fr_0.9fr]">

@@ -8,6 +8,11 @@ export async function PUT(request: Request) {
   }
 
   const body = await request.json();
-  const profile = await upsertAdminProfile({ bio: String(body.bio ?? "") });
+  const profile = await upsertAdminProfile({
+    bio: body.bio != null ? String(body.bio) : undefined,
+    avatar_url: body.avatar_url ?? undefined,
+    resume_url: body.resume_url ?? undefined,
+    letter_url: body.letter_url ?? undefined,
+  });
   return NextResponse.json(profile);
 }

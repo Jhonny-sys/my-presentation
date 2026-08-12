@@ -93,7 +93,12 @@ export async function fetchAdminPortfolio(): Promise<Portfolio> {
   return adminFetch<Portfolio>("/portfolio");
 }
 
-export async function upsertAdminProfile(body: { bio: string }): Promise<PersonalInfo> {
+export async function upsertAdminProfile(body: {
+  bio?: string;
+  avatar_url?: string | null;
+  resume_url?: string | null;
+  letter_url?: string | null;
+}): Promise<PersonalInfo> {
   return adminFetch<PersonalInfo>("/profile", {
     method: "PUT",
     body: JSON.stringify(body),
