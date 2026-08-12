@@ -9,6 +9,10 @@ import {
   orbLabel,
   type LangCode,
 } from "@/lib/i18n/landing";
+import {
+  groupTechnologiesByCategory,
+  techCategoryLabel,
+} from "@/lib/technologies/categories";
 
 type Props = {
   section: "profile" | "experience" | "studies" | "technologies";
@@ -191,49 +195,56 @@ export function SectionContent({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <h2 className="text-2xl font-bold text-white">
         {orbLabel(lang, "technologies", messages)}
       </h2>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {portfolio.technologies.length === 0 ? (
-          <p className="text-white/40">{EMPTY_LABEL[lang]}</p>
-        ) : (
-          portfolio.technologies.map((tech) => {
-            const description = localizedEntityText(
-              messages,
-              entityI18nKey("technologies", tech.id, "description"),
-              lang,
-              tech.description,
-            );
+      {portfolio.technologies.length === 0 ? (
+        <p className="text-white/40">{EMPTY_LABEL[lang]}</p>
+      ) : (
+        groupTechnologiesByCategory(portfolio.technologies).map((group) => (
+          <section key={group.category} className="space-y-3">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-300/70">
+              {techCategoryLabel(lang, group.category)}
+            </h3>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {group.items.map((tech) => {
+                const description = localizedEntityText(
+                  messages,
+                  entityI18nKey("technologies", tech.id, "description"),
+                  lang,
+                  tech.description,
+                );
 
-            return (
-            <article
-              key={tech.id}
-              className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4"
-            >
-              {tech.icon_url && (
-                <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white p-1">
-                  <Image
-                    src={tech.icon_url}
-                    alt={tech.name}
-                    fill
-                    className="object-contain p-0.5"
-                    sizes="40px"
-                  />
-                </span>
-              )}
-              <div>
-                <p className="font-semibold text-cyan-100">{tech.name}</p>
-                {description && (
-                  <p className="mt-1 text-sm text-white/60">{description}</p>
-                )}
-              </div>
-            </article>
-            );
-          })
-        )}
-      </div>
+                return (
+                  <article
+                    key={tech.id}
+                    className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4"
+                  >
+                    {tech.icon_url && (
+                      <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white p-1">
+                        <Image
+                          src={tech.icon_url}
+                          alt={tech.name}
+                          fill
+                          className="object-contain p-0.5"
+                          sizes="40px"
+                        />
+                      </span>
+                    )}
+                    <div>
+                      <p className="font-semibold text-cyan-100">{tech.name}</p>
+                      {description && (
+                        <p className="mt-1 text-sm text-white/60">{description}</p>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        ))
+      )}
       <p className="text-[11px] text-white/35">
         Iconos vía{" "}
         <a

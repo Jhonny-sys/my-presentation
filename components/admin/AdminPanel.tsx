@@ -7,6 +7,7 @@ import * as adminApi from "@/lib/admin-api";
 import { Field, FileUploadField, inputClass } from "@/components/admin/FileUploadField";
 import { IconifyIconPicker } from "@/components/admin/IconifyIconPicker";
 import type { Experience, Study, Technology } from "@/lib/api/types";
+import { TECH_CATEGORY_OPTIONS, type TechCategoryId } from "@/lib/technologies/categories";
 
 type Props = {
   initialPortfolio: Portfolio;
@@ -36,6 +37,7 @@ const emptyTechnology = {
   name: "",
   description: "",
   icon_url: "",
+  category: "backend" as TechCategoryId,
 };
 
 export function AdminPanel({ initialPortfolio }: Props) {
@@ -253,6 +255,10 @@ export function AdminPanel({ initialPortfolio }: Props) {
       name: item.name,
       description: item.description ?? "",
       icon_url: item.icon_url ?? "",
+      category:
+        TECH_CATEGORY_OPTIONS.some((option) => option.id === item.category)
+          ? (item.category as TechCategoryId)
+          : "backend",
     });
   }
 
@@ -263,6 +269,7 @@ export function AdminPanel({ initialPortfolio }: Props) {
       name: techForm.name.trim(),
       description: techForm.description || null,
       icon_url: techForm.icon_url || null,
+      category: techForm.category,
     };
     try {
       let item: Technology;
@@ -688,6 +695,24 @@ export function AdminPanel({ initialPortfolio }: Props) {
                   onChange={(e) => setTechForm({ ...techForm, description: e.target.value })}
                 />
               </Field>
+              <Field label="Categoría">
+                <select
+                  className={inputClass}
+                  value={techForm.category}
+                  onChange={(e) =>
+                    setTechForm({
+                      ...techForm,
+                      category: e.target.value as TechCategoryId,
+                    })
+                  }
+                >
+                  {TECH_CATEGORY_OPTIONS.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.adminLabel}
+                    </option>
+                  ))}
+                </select>
+              </Field>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -719,7 +744,13 @@ export function AdminPanel({ initialPortfolio }: Props) {
                       </span>
                     )}
                     <div>
-                      <p className="font-semibold text-white">{item.name}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold text-white">{item.name}</p>
+                        <span className="rounded-full border border-white/10 px-2 py-0.5 text-[11px] uppercase tracking-wide text-cyan-300/80">
+                          {TECH_CATEGORY_OPTIONS.find((option) => option.id === item.category)
+                            ?.adminLabel ?? item.category}
+                        </span>
+                      </div>
                       {item.description && (
                         <p className="text-sm text-white/50">{item.description}</p>
                       )}

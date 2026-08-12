@@ -43,10 +43,12 @@ export type Study = {
   certificate_url?: string | null;
 };
 
+export type TechnologyCategory = "backend" | "frontend" | "database" | "cloud" | "other";
+
 export type Technology = {
   id: string;
   name: string;
-  category: string;
+  category: TechnologyCategory | string;
   description?: string | null;
   proficiency?: number | null;
   icon_url?: string | null;
