@@ -19,8 +19,8 @@ export function getAssetUrls() {
 }
 
 export const ADMIN_SECTIONS = [
-  { id: "profile", label: "Perfil", namespace: "profile" },
-  { id: "experience", label: "Experiencia", namespace: "experience" },
-  { id: "studies", label: "Estudios", namespace: "studies" },
-  { id: "technologies", label: "Tecnologías", namespace: "technologies" },
+  { id: "profile", label: "Perfil", table: "personal_info" },
+  { id: "experience", label: "Experiencia", table: "experience" },
+  { id: "studies", label: "Estudios", table: "studies" },
+  { id: "technologies", label: "Tecnologías", table: "technologies" },
 ] as const;

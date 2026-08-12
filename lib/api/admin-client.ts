@@ -1,5 +1,13 @@
 import { cookies } from "next/headers";
-import type { I18nEntry, TokenResponse } from "./types";
+import type {
+  Experience,
+  I18nEntry,
+  PersonalInfo,
+  Portfolio,
+  Study,
+  Technology,
+  TokenResponse,
+} from "./types";
 import { getApiBaseUrl } from "./config";
 import {
   ACCESS_TOKEN_COOKIE,
@@ -79,6 +87,99 @@ async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   return response.json();
+}
+
+export async function fetchAdminPortfolio(): Promise<Portfolio> {
+  return adminFetch<Portfolio>("/portfolio");
+}
+
+export async function upsertAdminProfile(body: { bio: string }): Promise<PersonalInfo> {
+  return adminFetch<PersonalInfo>("/profile", {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function createAdminExperience(body: Record<string, unknown>): Promise<Experience> {
+  return adminFetch<Experience>("/experience", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function updateAdminExperience(
+  id: string,
+  body: Record<string, unknown>,
+): Promise<Experience> {
+  return adminFetch<Experience>(`/experience/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteAdminExperience(id: string): Promise<void> {
+  return adminFetch<void>(`/experience/${id}`, { method: "DELETE" });
+}
+
+export async function createAdminStudy(body: Record<string, unknown>): Promise<Study> {
+  return adminFetch<Study>("/studies", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function updateAdminStudy(
+  id: string,
+  body: Record<string, unknown>,
+): Promise<Study> {
+  return adminFetch<Study>(`/studies/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteAdminStudy(id: string): Promise<void> {
+  return adminFetch<void>(`/studies/${id}`, { method: "DELETE" });
+}
+
+export async function createAdminTechnology(body: Record<string, unknown>): Promise<Technology> {
+  return adminFetch<Technology>("/technologies", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function updateAdminTechnology(
+  id: string,
+  body: Record<string, unknown>,
+): Promise<Technology> {
+  return adminFetch<Technology>(`/technologies/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteAdminTechnology(id: string): Promise<void> {
+  return adminFetch<void>(`/technologies/${id}`, { method: "DELETE" });
+}
+
+export async function uploadAdminFile(file: File): Promise<string> {
+  const token = await getAdminAccessToken();
+  if (!token) throw new Error("No autenticado");
+
+  const form = new FormData();
+  form.append("file_1", file);
+
+  const response = await fetch(`${getApiBaseUrl()}/uploads`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+    cache: "no-store",
+  });
+
+  if (!response.ok) throw new Error("Error al subir archivo");
+  const data = (await response.json()) as { files: { url: string }[] };
+  return data.files[0]?.url ?? "";
 }
 
 export async function fetchAdminI18nEntries(): Promise<I18nEntry[]> {

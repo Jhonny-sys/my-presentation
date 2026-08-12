@@ -27,6 +27,7 @@ export type Experience = {
   end_date?: string | null;
   is_current: boolean;
   location?: string | null;
+  company_logo_url?: string | null;
   highlights: string[];
 };
 
@@ -38,13 +39,16 @@ export type Study = {
   start_date?: string | null;
   end_date?: string | null;
   is_current: boolean;
+  certificate_url?: string | null;
 };
 
 export type Technology = {
   id: string;
   name: string;
   category: string;
+  description?: string | null;
   proficiency?: number | null;
+  icon_url?: string | null;
   is_featured: boolean;
 };
 
