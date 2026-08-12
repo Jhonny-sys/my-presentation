@@ -8,6 +8,7 @@ import { normalizeExternalUrl, whatsAppWebUrl } from "@/lib/contact";
 type ChatMessage = {
   role: "user" | "assistant";
   text: string;
+  showContact?: boolean;
 };
 
 type ChatResponse = {
@@ -24,6 +25,17 @@ type Props = {
 
 const MAX_TURNS = 3;
 
+const CONTACT_FALLBACK_MARKERS: Record<LangCode, string[]> = {
+  es: ["no tengo ese dato", "contáctame directamente", "contactame directamente"],
+  en: ["don't have that", "contact me directly"],
+  pt: ["não tenho esse dado", "contatar diretamente", "contate-me diretamente"],
+};
+
+function replySuggestsContact(reply: string, lang: LangCode): boolean {
+  const lower = reply.toLowerCase();
+  return CONTACT_FALLBACK_MARKERS[lang].some((marker) => lower.includes(marker));
+}
+
 const UI: Record<
   LangCode,
   {
@@ -35,7 +47,10 @@ const UI: Record<
     close: string;
     turnsLeft: (n: number) => string;
     noTurns: string;
-    contactTitle: string;
+    contactPrompt: string;
+    contactEmail: string;
+    contactPhone: string;
+    contactLinkedIn: string;
     error: string;
     welcome: string;
   }
@@ -49,7 +64,10 @@ const UI: Record<
     close: "Cerrar",
     turnsLeft: (n) => `${n} pregunta${n === 1 ? "" : "s"} restante${n === 1 ? "" : "s"}`,
     noTurns: "Has usado tus preguntas. Contáctame directamente:",
-    contactTitle: "Contacto",
+    contactPrompt: "Puedes contactarme directamente:",
+    contactEmail: "Correo",
+    contactPhone: "Teléfono",
+    contactLinkedIn: "LinkedIn",
     error: "No pude responder. Intenta de nuevo o contáctame.",
     welcome: "Hola, soy el asistente del portfolio. Puedo responder hasta 3 preguntas sobre mi experiencia, estudios, stack y proyectos.",
   },
@@ -62,7 +80,10 @@ const UI: Record<
     close: "Close",
     turnsLeft: (n) => `${n} question${n === 1 ? "" : "s"} left`,
     noTurns: "You've used your questions. Contact me directly:",
-    contactTitle: "Contact",
+    contactPrompt: "You can contact me directly:",
+    contactEmail: "Email",
+    contactPhone: "Phone",
+    contactLinkedIn: "LinkedIn",
     error: "I couldn't reply. Try again or contact me.",
     welcome: "Hi, I'm the portfolio assistant. I can answer up to 3 questions about my experience, studies, tech stack, and projects.",
   },
@@ -75,11 +96,80 @@ const UI: Record<
     close: "Fechar",
     turnsLeft: (n) => `${n} pergunta${n === 1 ? "" : "s"} restante${n === 1 ? "" : "s"}`,
     noTurns: "Você usou suas perguntas. Entre em contato diretamente:",
-    contactTitle: "Contato",
+    contactPrompt: "Você pode me contatar diretamente:",
+    contactEmail: "E-mail",
+    contactPhone: "Telefone",
+    contactLinkedIn: "LinkedIn",
     error: "Não consegui responder. Tente novamente ou entre em contato.",
     welcome: "Olá, sou o assistente do portfólio. Posso responder até 3 perguntas sobre experiência, estudos, stack e projetos.",
   },
 };
+
+function buildDirectContactLinks(
+  profile: PersonalInfo | null | undefined,
+  labels: (typeof UI)["es"],
+): { label: string; href: string; detail?: string }[] {
+  const links: { label: string; href: string; detail?: string }[] = [];
+
+  if (profile?.email) {
+    links.push({
+      label: labels.contactEmail,
+      detail: profile.email,
+      href: `mailto:${profile.email.trim()}`,
+    });
+  }
+
+  if (profile?.social_links?.linkedin) {
+    links.push({
+      label: labels.contactLinkedIn,
+      href: normalizeExternalUrl(profile.social_links.linkedin),
+    });
+  }
+
+  if (profile?.phone) {
+    const wa = whatsAppWebUrl(profile.phone);
+    links.push({
+      label: labels.contactPhone,
+      detail: profile.phone,
+      href: wa || `tel:${profile.phone.replace(/\s/g, "")}`,
+    });
+  }
+
+  return links;
+}
+
+function ChatContactLinks({
+  profile,
+  labels,
+  prompt,
+}: {
+  profile?: PersonalInfo | null;
+  labels: (typeof UI)["es"];
+  prompt: string;
+}) {
+  const links = buildDirectContactLinks(profile, labels);
+  if (links.length === 0) return null;
+
+  return (
+    <div className="mt-2 max-w-[90%] rounded-xl border border-cyan-400/15 bg-cyan-400/5 px-3 py-2.5">
+      <p className="mb-2 text-xs text-white/55">{prompt}</p>
+      <div className="flex flex-col gap-2">
+        {links.map((link) => (
+          <a
+            key={link.label}
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg border border-cyan-400/20 bg-black/20 px-2.5 py-1.5 text-xs text-cyan-100 transition hover:bg-cyan-400/10"
+          >
+            <span className="font-semibold">{link.label}</span>
+            {link.detail && <span className="truncate text-white/60">{link.detail}</span>}
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function PortfolioChat({ lang, profile }: Props) {
   const [open, setOpen] = useState(false);
@@ -87,26 +177,17 @@ export function PortfolioChat({ lang, profile }: Props) {
   const [loading, setLoading] = useState(false);
   const [turn, setTurn] = useState(0);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [suggestContact, setSuggestContact] = useState(false);
 
   const t = UI[lang];
   const turnsRemaining = MAX_TURNS - turn;
   const canAsk = turnsRemaining > 0 && !loading;
 
-  const contactLinks = useMemo(() => {
-    const links: { label: string; href: string }[] = [];
-    if (profile?.email) links.push({ label: profile.email, href: "#contact-email" });
-    if (profile?.phone && whatsAppWebUrl(profile.phone)) {
-      links.push({ label: profile.phone, href: whatsAppWebUrl(profile.phone) });
+  const lastAssistantWithContact = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i -= 1) {
+      if (messages[i].role === "assistant" && messages[i].showContact) return i;
     }
-    if (profile?.social_links?.linkedin) {
-      links.push({ label: "LinkedIn", href: normalizeExternalUrl(profile.social_links.linkedin) });
-    }
-    if (profile?.social_links?.github) {
-      links.push({ label: "GitHub", href: normalizeExternalUrl(profile.social_links.github) });
-    }
-    return links;
-  }, [profile]);
+    return -1;
+  }, [messages]);
 
   function openChat() {
     setOpen(true);
@@ -137,11 +218,19 @@ export function PortfolioChat({ lang, profile }: Props) {
         throw new Error(data.detail ?? "Error");
       }
 
+      const showContact =
+        data.suggest_contact || replySuggestsContact(data.reply, lang);
+
       setTurn(nextTurn);
-      setSuggestContact(data.suggest_contact);
-      setMessages((prev) => [...prev, { role: "assistant", text: data.reply }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: data.reply, showContact },
+      ]);
     } catch {
-      setMessages((prev) => [...prev, { role: "assistant", text: t.error }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: t.error, showContact: true },
+      ]);
     } finally {
       setLoading(false);
     }
@@ -177,15 +266,23 @@ export function PortfolioChat({ lang, profile }: Props) {
 
           <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
             {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`max-w-[90%] rounded-xl px-3 py-2 text-sm leading-6 ${
-                  msg.role === "user"
-                    ? "ml-auto bg-cyan-400/20 text-cyan-50"
-                    : "bg-white/5 text-white/80"
-                }`}
-              >
-                {msg.text}
+              <div key={index}>
+                <div
+                  className={`max-w-[90%] rounded-xl px-3 py-2 text-sm leading-6 ${
+                    msg.role === "user"
+                      ? "ml-auto bg-cyan-400/20 text-cyan-50"
+                      : "bg-white/5 text-white/80"
+                  }`}
+                >
+                  {msg.text}
+                </div>
+                {msg.role === "assistant" && msg.showContact && (
+                  <ChatContactLinks
+                    profile={profile}
+                    labels={t}
+                    prompt={turnsRemaining === 0 ? t.noTurns : t.contactPrompt}
+                  />
+                )}
               </div>
             ))}
             {loading && (
@@ -195,40 +292,14 @@ export function PortfolioChat({ lang, profile }: Props) {
             )}
           </div>
 
-          {(suggestContact || turnsRemaining === 0) && contactLinks.length > 0 && (
-            <div className="border-t border-white/10 px-4 py-3">
-              <p className="mb-2 text-xs text-white/50">{t.noTurns}</p>
-              <div className="flex flex-wrap gap-2">
-                {contactLinks.map((link) => (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    target={link.href.startsWith("#") ? undefined : "_blank"}
-                    rel="noopener noreferrer"
-                    className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2.5 py-1 text-xs text-cyan-100 hover:bg-cyan-400/20"
-                    onClick={
-                      link.href === "#contact-email"
-                        ? (e) => {
-                            e.preventDefault();
-                            document
-                              .querySelector<HTMLElement>('[data-contact="email"]')
-                              ?.click();
-                          }
-                        : undefined
-                    }
-                  >
-                    {link.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-
           <footer className="border-t border-white/10 px-4 py-3">
             {turnsRemaining > 0 && (
               <p className="mb-2 text-xs text-white/40">{t.turnsLeft(turnsRemaining)}</p>
             )}
-            <form onSubmit={sendMessage} className="flex gap-2">
+            {turnsRemaining === 0 && lastAssistantWithContact === -1 && (
+              <ChatContactLinks profile={profile} labels={t} prompt={t.noTurns} />
+            )}
+            <form onSubmit={sendMessage} className="mt-2 flex gap-2">
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
