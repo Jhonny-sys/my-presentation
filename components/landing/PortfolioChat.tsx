@@ -51,7 +51,7 @@ const UI: Record<
     noTurns: "Has usado tus preguntas. Contáctame directamente:",
     contactTitle: "Contacto",
     error: "No pude responder. Intenta de nuevo o contáctame.",
-    welcome: "Hola, soy el asistente del portfolio. Puedo responder hasta 3 preguntas sobre mi experiencia, estudios y tecnologías.",
+    welcome: "Hola, soy el asistente del portfolio. Puedo responder hasta 3 preguntas sobre mi experiencia, estudios, stack y proyectos.",
   },
   en: {
     title: "Assistant",
@@ -64,7 +64,7 @@ const UI: Record<
     noTurns: "You've used your questions. Contact me directly:",
     contactTitle: "Contact",
     error: "I couldn't reply. Try again or contact me.",
-    welcome: "Hi, I'm the portfolio assistant. I can answer up to 3 questions about my experience, studies, and tech stack.",
+    welcome: "Hi, I'm the portfolio assistant. I can answer up to 3 questions about my experience, studies, tech stack, and projects.",
   },
   pt: {
     title: "Assistente",
@@ -77,7 +77,7 @@ const UI: Record<
     noTurns: "Você usou suas perguntas. Entre em contato diretamente:",
     contactTitle: "Contato",
     error: "Não consegui responder. Tente novamente ou entre em contato.",
-    welcome: "Olá, sou o assistente do portfólio. Posso responder até 3 perguntas sobre experiência, estudos e tecnologias.",
+    welcome: "Olá, sou o assistente do portfólio. Posso responder até 3 perguntas sobre experiência, estudos, stack e projetos.",
   },
 };
 
