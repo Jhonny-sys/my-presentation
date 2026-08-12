@@ -34,6 +34,10 @@ export async function saveProfile(body: {
   avatar_url?: string | null;
   resume_url?: string | null;
   letter_url?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  github?: string | null;
+  linkedin?: string | null;
 }) {
   return api<PersonalInfo>("/api/admin/profile", {
     method: "PUT",

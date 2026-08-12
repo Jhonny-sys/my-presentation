@@ -13,6 +13,10 @@ export async function PUT(request: Request) {
     avatar_url: body.avatar_url ?? undefined,
     resume_url: body.resume_url ?? undefined,
     letter_url: body.letter_url ?? undefined,
+    email: body.email != null ? String(body.email) : undefined,
+    phone: body.phone != null ? String(body.phone) : undefined,
+    github: body.github != null ? String(body.github) : undefined,
+    linkedin: body.linkedin != null ? String(body.linkedin) : undefined,
   });
   return NextResponse.json(profile);
 }

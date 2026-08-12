@@ -20,6 +20,7 @@ export function getAssetUrls() {
 
 export const ADMIN_SECTIONS = [
   { id: "profile", label: "Perfil", table: "personal_info" },
+  { id: "information", label: "Información", table: "personal_info" },
   { id: "experience", label: "Experiencia", table: "experience" },
   { id: "studies", label: "Estudios", table: "studies" },
   { id: "technologies", label: "Tecnologías", table: "technologies" },

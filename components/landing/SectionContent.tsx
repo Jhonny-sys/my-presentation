@@ -26,6 +26,14 @@ function formatPeriod(
   return start ? `${start} — ${endLabel}` : endLabel;
 }
 
+function splitDescriptionBySentences(text: string): string[] {
+  return text
+    .split(".")
+    .map((sentence) => sentence.trim())
+    .filter(Boolean)
+    .map((sentence) => (sentence.endsWith(".") ? sentence : `${sentence}.`));
+}
+
 export function SectionContent({
   section,
   portfolio,
@@ -81,7 +89,14 @@ export function SectionContent({
                       </p>
                     </div>
                     {item.description && (
-                      <p className="mt-2 text-sm leading-6 text-white/70">{item.description}</p>
+                      <ul className="mt-3 space-y-2 text-sm leading-6 text-white/70">
+                        {splitDescriptionBySentences(item.description).map((sentence, index) => (
+                          <li key={index} className="flex gap-2.5">
+                            <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-cyan-400/80" />
+                            <span>{sentence}</span>
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </div>
                 </div>

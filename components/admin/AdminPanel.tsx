@@ -49,6 +49,10 @@ export function AdminPanel({ initialPortfolio }: Props) {
   const [avatarUrl, setAvatarUrl] = useState(portfolio.profile?.avatar_url ?? "");
   const [resumeUrl, setResumeUrl] = useState(portfolio.profile?.resume_url ?? "");
   const [letterUrl, setLetterUrl] = useState(portfolio.profile?.letter_url ?? "");
+  const [contactEmail, setContactEmail] = useState(portfolio.profile?.email ?? "");
+  const [contactPhone, setContactPhone] = useState(portfolio.profile?.phone ?? "");
+  const [githubUrl, setGithubUrl] = useState(portfolio.profile?.social_links?.github ?? "");
+  const [linkedinUrl, setLinkedinUrl] = useState(portfolio.profile?.social_links?.linkedin ?? "");
   const [expForm, setExpForm] = useState(emptyExperience);
   const [editingExpId, setEditingExpId] = useState<string | null>(null);
   const [studyForm, setStudyForm] = useState(emptyStudy);
@@ -57,6 +61,29 @@ export function AdminPanel({ initialPortfolio }: Props) {
   const [editingTechId, setEditingTechId] = useState<string | null>(null);
 
   const currentSection = ADMIN_SECTIONS.find((item) => item.id === section)!;
+
+  async function saveContactInfo() {
+    setLoading(true);
+    setStatus("");
+    try {
+      const profile = await adminApi.saveProfile({
+        email: contactEmail.trim() || null,
+        phone: contactPhone.trim() || null,
+        github: githubUrl.trim() || null,
+        linkedin: linkedinUrl.trim() || null,
+      });
+      setPortfolio((prev) => ({ ...prev, profile }));
+      setContactEmail(profile.email ?? "");
+      setContactPhone(profile.phone ?? "");
+      setGithubUrl(profile.social_links?.github ?? "");
+      setLinkedinUrl(profile.social_links?.linkedin ?? "");
+      setStatus("Información guardada");
+    } catch {
+      setStatus("Error al guardar información");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function saveProfile() {
     setLoading(true);
@@ -360,6 +387,56 @@ export function AdminPanel({ initialPortfolio }: Props) {
               className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-black hover:bg-cyan-300 disabled:opacity-50"
             >
               {loading ? "Guardando..." : "Guardar perfil"}
+            </button>
+          </article>
+        )}
+
+        {section === "information" && (
+          <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+            <Field label="GitHub (URL)">
+              <input
+                className={inputClass}
+                value={githubUrl}
+                onChange={(e) => setGithubUrl(e.target.value)}
+                placeholder="https://github.com/tu-usuario"
+              />
+            </Field>
+            <Field label="LinkedIn (URL)">
+              <input
+                className={inputClass}
+                value={linkedinUrl}
+                onChange={(e) => setLinkedinUrl(e.target.value)}
+                placeholder="https://linkedin.com/in/tu-perfil"
+              />
+            </Field>
+            <Field label="Correo electrónico">
+              <input
+                type="email"
+                className={inputClass}
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+                placeholder="correo@ejemplo.com"
+              />
+            </Field>
+            <Field label="Teléfono (WhatsApp)">
+              <input
+                type="tel"
+                className={inputClass}
+                value={contactPhone}
+                onChange={(e) => setContactPhone(e.target.value)}
+                placeholder="+57 300 123 4567"
+              />
+            </Field>
+            <p className="text-xs text-white/40">
+              El teléfono abrirá WhatsApp Web. El correo mostrará opción de Gmail u Outlook.
+            </p>
+            <button
+              type="button"
+              onClick={saveContactInfo}
+              disabled={loading}
+              className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-black hover:bg-cyan-300 disabled:opacity-50"
+            >
+              {loading ? "Guardando..." : "Guardar información"}
             </button>
           </article>
         )}

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Portfolio } from "@/lib/api/types";
+import { ContactInfo } from "@/components/landing/ContactInfo";
 import { LanguageSwitcher } from "@/components/landing/LanguageSwitcher";
 import { ProfileAssets } from "@/components/landing/ProfileAssets";
 import { SectionContent } from "@/components/landing/SectionContent";
@@ -103,6 +104,7 @@ export function LandingShell({
             </span>
           </h1>
           {bio && <p className="max-w-xl text-lg leading-8 text-white/65">{bio}</p>}
+          <ContactInfo profile={profile} />
           {error && <p className="text-sm text-amber-300/90">{error}</p>}
         </div>
 
