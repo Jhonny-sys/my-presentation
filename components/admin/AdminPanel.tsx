@@ -55,6 +55,7 @@ export function AdminPanel({ initialPortfolio }: Props) {
   const [contactPhone, setContactPhone] = useState(portfolio.profile?.phone ?? "");
   const [githubUrl, setGithubUrl] = useState(portfolio.profile?.social_links?.github ?? "");
   const [linkedinUrl, setLinkedinUrl] = useState(portfolio.profile?.social_links?.linkedin ?? "");
+  const [contactLocation, setContactLocation] = useState(portfolio.profile?.location ?? "");
   const [expForm, setExpForm] = useState(emptyExperience);
   const [editingExpId, setEditingExpId] = useState<string | null>(null);
   const [studyForm, setStudyForm] = useState(emptyStudy);
@@ -71,12 +72,14 @@ export function AdminPanel({ initialPortfolio }: Props) {
       const profile = await adminApi.saveProfile({
         email: contactEmail.trim() || null,
         phone: contactPhone.trim() || null,
+        location: contactLocation.trim() || null,
         github: githubUrl.trim() || null,
         linkedin: linkedinUrl.trim() || null,
       });
       setPortfolio((prev) => ({ ...prev, profile }));
       setContactEmail(profile.email ?? "");
       setContactPhone(profile.phone ?? "");
+      setContactLocation(profile.location ?? "");
       setGithubUrl(profile.social_links?.github ?? "");
       setLinkedinUrl(profile.social_links?.linkedin ?? "");
       setStatus("Información guardada");
@@ -434,8 +437,17 @@ export function AdminPanel({ initialPortfolio }: Props) {
                 placeholder="+57 300 123 4567"
               />
             </Field>
+            <Field label="Ubicación (mapa)">
+              <input
+                className={inputClass}
+                value={contactLocation}
+                onChange={(e) => setContactLocation(e.target.value)}
+                placeholder="Bogotá, Colombia"
+              />
+            </Field>
             <p className="text-xs text-white/40">
               El teléfono abrirá WhatsApp Web. El correo mostrará opción de Gmail u Outlook.
+              La ubicación abrirá Google Maps o Apple Maps según el dispositivo.
             </p>
             <button
               type="button"

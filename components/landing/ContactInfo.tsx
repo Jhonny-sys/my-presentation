@@ -2,12 +2,13 @@
 
 import { useState, type ReactNode } from "react";
 import type { PersonalInfo } from "@/lib/api/types";
-import { normalizeExternalUrl, whatsAppWebUrl } from "@/lib/contact";
+import { normalizeExternalUrl, openMapsLocation, whatsAppWebUrl } from "@/lib/contact";
 import { EmailComposeModal } from "@/components/landing/EmailComposeModal";
 import {
   GitHubIcon,
   LinkedInIcon,
   MailIcon,
+  MapPinIcon,
   WhatsAppIcon,
 } from "@/components/landing/ContactIcons";
 
@@ -81,9 +82,10 @@ export function ContactInfo({ profile }: Props) {
   const linkedin = profile?.social_links?.linkedin?.trim();
   const email = profile?.email?.trim();
   const phone = profile?.phone?.trim();
+  const location = profile?.location?.trim();
   const whatsappUrl = phone ? whatsAppWebUrl(phone) : "";
 
-  const hasAny = github || linkedin || email || phone;
+  const hasAny = github || linkedin || email || phone || location;
   if (!hasAny) return null;
 
   return (
@@ -138,6 +140,18 @@ export function ContactInfo({ profile }: Props) {
               border="border-emerald-400/30 bg-emerald-500/10"
               text="text-emerald-50"
               hoverBg="hover:bg-emerald-500/20 hover:border-emerald-400/50"
+            />
+          )}
+          {location && (
+            <ContactChip
+              label={location}
+              onClick={() => openMapsLocation(location)}
+              icon={<MapPinIcon className="h-5 w-5 text-rose-50" />}
+              iconBg="bg-gradient-to-br from-rose-500 to-orange-500"
+              glow="0 0 22px rgba(244,63,94,0.45)"
+              border="border-rose-400/30 bg-rose-500/10"
+              text="text-rose-50"
+              hoverBg="hover:bg-rose-500/20 hover:border-rose-400/50"
             />
           )}
         </div>

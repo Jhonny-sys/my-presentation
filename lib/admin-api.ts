@@ -36,6 +36,7 @@ export async function saveProfile(body: {
   letter_url?: string | null;
   email?: string | null;
   phone?: string | null;
+  location?: string | null;
   github?: string | null;
   linkedin?: string | null;
 }) {

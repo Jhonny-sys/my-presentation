@@ -15,6 +15,7 @@ export async function PUT(request: Request) {
     letter_url: body.letter_url ?? undefined,
     email: body.email != null ? String(body.email) : undefined,
     phone: body.phone != null ? String(body.phone) : undefined,
+    location: body.location != null ? String(body.location) : undefined,
     github: body.github != null ? String(body.github) : undefined,
     linkedin: body.linkedin != null ? String(body.linkedin) : undefined,
   });
