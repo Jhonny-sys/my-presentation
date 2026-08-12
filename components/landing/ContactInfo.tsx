@@ -25,6 +25,7 @@ type ContactChipProps = {
   hoverBg: string;
   onClick?: () => void;
   href?: string;
+  dataContact?: string;
 };
 
 function ContactChip({
@@ -37,6 +38,7 @@ function ContactChip({
   hoverBg,
   onClick,
   href,
+  dataContact,
 }: ContactChipProps) {
   const className = `group inline-flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-sm font-medium transition duration-300 hover:-translate-y-0.5 hover:shadow-lg ${border} ${text} ${hoverBg}`;
 
@@ -61,7 +63,12 @@ function ContactChip({
   }
 
   return (
-    <button type="button" onClick={onClick} className={className}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={className}
+      {...(dataContact ? { "data-contact": dataContact } : {})}
+    >
       {content}
     </button>
   );
@@ -112,6 +119,7 @@ export function ContactInfo({ profile }: Props) {
             <ContactChip
               label={email}
               onClick={() => setEmailModalOpen(true)}
+              dataContact="email"
               icon={<MailIcon className="h-5 w-5 text-amber-100" />}
               iconBg="bg-gradient-to-br from-amber-400 to-orange-500"
               glow="0 0 22px rgba(251,191,36,0.45)"

@@ -31,10 +31,8 @@ export default async function HomePage() {
   let error = "";
 
   try {
-    const [portfolioData, bundles] = await Promise.all([
-      fetchPortfolio(),
-      loadMessagesByLang(),
-    ]);
+    const portfolioData = await fetchPortfolio();
+    const bundles = await loadMessagesByLang();
     portfolio = portfolioData;
     messagesByLang = bundles;
   } catch {

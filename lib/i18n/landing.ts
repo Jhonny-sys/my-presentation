@@ -78,3 +78,37 @@ export function localizedBio(
 ): string {
   return localizedProfileText(messages, "profile.bio", lang, profileBio, "");
 }
+
+export function entityI18nKey(
+  namespace: "experience" | "studies" | "technologies",
+  id: string,
+  field: string,
+): string {
+  return `${namespace}.id_${id.replace(/-/g, "_")}.${field}`;
+}
+
+export function localizedEntityText(
+  messages: Record<string, string>,
+  key: string,
+  lang: LangCode,
+  sourceFallback?: string | null,
+): string {
+  return localizedProfileText(messages, key, lang, sourceFallback, sourceFallback ?? "");
+}
+
+const CURRENT_LABEL: Record<LangCode, string> = {
+  es: "Actualmente",
+  en: "Currently",
+  pt: "Atualmente",
+};
+
+export function formatLocalizedPeriod(
+  lang: LangCode,
+  start?: string | null,
+  end?: string | null,
+  isCurrent?: boolean,
+): string {
+  if (!start && !end) return isCurrent ? CURRENT_LABEL[lang] : "";
+  const endLabel = isCurrent ? CURRENT_LABEL[lang] : end ?? "";
+  return start ? `${start} — ${endLabel}` : endLabel;
+}

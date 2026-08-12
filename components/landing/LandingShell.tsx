@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Portfolio } from "@/lib/api/types";
+import { PortfolioChat } from "@/components/landing/PortfolioChat";
 import { ContactInfo } from "@/components/landing/ContactInfo";
 import { LanguageSwitcher } from "@/components/landing/LanguageSwitcher";
 import { ProfileAssets } from "@/components/landing/ProfileAssets";
@@ -123,6 +124,7 @@ export function LandingShell({
               section={activeOrb}
               portfolio={portfolio}
               messages={messages}
+              lang={lang}
               name={name}
               headline={headline}
               bio={bio}
@@ -134,6 +136,8 @@ export function LandingShell({
           )}
         </SectionModal>
       )}
+
+      <PortfolioChat lang={lang} profile={profile} />
     </>
   );
 }
