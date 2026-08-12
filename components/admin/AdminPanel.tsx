@@ -5,6 +5,7 @@ import type { Portfolio } from "@/lib/api/types";
 import { ADMIN_SECTIONS } from "@/lib/api/config";
 import * as adminApi from "@/lib/admin-api";
 import { Field, FileUploadField, inputClass } from "@/components/admin/FileUploadField";
+import { IconifyIconPicker } from "@/components/admin/IconifyIconPicker";
 import type { Experience, Study, Technology } from "@/lib/api/types";
 
 type Props = {
@@ -550,15 +551,10 @@ export function AdminPanel({ initialPortfolio }: Props) {
               <h2 className="text-lg font-semibold text-white">
                 {editingTechId ? "Editar tecnología" : "Nueva tecnología"}
               </h2>
-              <FileUploadField
-                label="Icono / favicon"
-                accept="image/*,.ico"
-                previewUrl={techForm.icon_url}
-                uploading={uploading}
-                onUploadStart={() => setUploading(true)}
-                onUploadEnd={() => setUploading(false)}
-                upload={adminApi.uploadFile}
-                onUploaded={(url) => setTechForm({ ...techForm, icon_url: url })}
+              <IconifyIconPicker
+                value={techForm.icon_url}
+                onChange={(url) => setTechForm({ ...techForm, icon_url: url })}
+                defaultQuery={techForm.name}
               />
               <Field label="Título">
                 <input
@@ -600,8 +596,10 @@ export function AdminPanel({ initialPortfolio }: Props) {
                 >
                   <div className="flex items-center gap-3">
                     {item.icon_url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.icon_url} alt="" className="h-8 w-8 rounded object-contain" />
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white p-1">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={item.icon_url} alt="" className="h-full w-full object-contain" />
+                      </span>
                     )}
                     <div>
                       <p className="font-semibold text-white">{item.name}</p>

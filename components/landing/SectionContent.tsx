@@ -155,15 +155,15 @@ export function SectionContent({
               className="flex gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4"
             >
               {tech.icon_url && (
-                <div className="relative h-10 w-10 shrink-0">
+                <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white p-1">
                   <Image
                     src={tech.icon_url}
                     alt={tech.name}
                     fill
-                    className="object-contain"
+                    className="object-contain p-0.5"
                     sizes="40px"
                   />
-                </div>
+                </span>
               )}
               <div>
                 <p className="font-semibold text-cyan-100">{tech.name}</p>
@@ -175,6 +175,17 @@ export function SectionContent({
           ))
         )}
       </div>
+      <p className="text-[11px] text-white/35">
+        Iconos vía{" "}
+        <a
+          href="https://iconify.design/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-white/50"
+        >
+          Iconify
+        </a>
+      </p>
     </div>
   );
 }
