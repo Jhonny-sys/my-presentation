@@ -56,6 +56,7 @@ export function AdminPanel({ initialPortfolio }: Props) {
   const [githubUrl, setGithubUrl] = useState(portfolio.profile?.social_links?.github ?? "");
   const [linkedinUrl, setLinkedinUrl] = useState(portfolio.profile?.social_links?.linkedin ?? "");
   const [contactLocation, setContactLocation] = useState(portfolio.profile?.location ?? "");
+  const [contactLanguages, setContactLanguages] = useState(portfolio.profile?.languages ?? "");
   const [expForm, setExpForm] = useState(emptyExperience);
   const [editingExpId, setEditingExpId] = useState<string | null>(null);
   const [studyForm, setStudyForm] = useState(emptyStudy);
@@ -73,6 +74,7 @@ export function AdminPanel({ initialPortfolio }: Props) {
         email: contactEmail.trim() || null,
         phone: contactPhone.trim() || null,
         location: contactLocation.trim() || null,
+        languages: contactLanguages.trim() || null,
         github: githubUrl.trim() || null,
         linkedin: linkedinUrl.trim() || null,
       });
@@ -80,6 +82,7 @@ export function AdminPanel({ initialPortfolio }: Props) {
       setContactEmail(profile.email ?? "");
       setContactPhone(profile.phone ?? "");
       setContactLocation(profile.location ?? "");
+      setContactLanguages(profile.languages ?? "");
       setGithubUrl(profile.social_links?.github ?? "");
       setLinkedinUrl(profile.social_links?.linkedin ?? "");
       setStatus("Información guardada");
@@ -445,9 +448,19 @@ export function AdminPanel({ initialPortfolio }: Props) {
                 placeholder="Bogotá, Colombia"
               />
             </Field>
+            <Field label="Idiomas (solo contexto Geraldine)">
+              <textarea
+                className={inputClass}
+                rows={3}
+                value={contactLanguages}
+                onChange={(e) => setContactLanguages(e.target.value)}
+                placeholder={"Español (nativo)\nInglés (intermedio)\nPortugués (básico)"}
+              />
+            </Field>
             <p className="text-xs text-white/40">
               El teléfono abrirá WhatsApp Web. El correo mostrará opción de Gmail u Outlook.
               La ubicación abrirá Google Maps o Apple Maps según el dispositivo.
+              Los idiomas no se muestran en la página; Geraldine los usa para responder en el chat.
             </p>
             <button
               type="button"

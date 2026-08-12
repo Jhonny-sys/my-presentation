@@ -12,6 +12,7 @@ export type PersonalInfo = {
   email?: string | null;
   phone?: string | null;
   location?: string | null;
+  languages?: string | null;
   avatar_url?: string | null;
   resume_url?: string | null;
   letter_url?: string | null;
