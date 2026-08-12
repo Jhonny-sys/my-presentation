@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import type { PersonalInfo } from "@/lib/api/types";
+import { GERALDINE_AVATAR_URL, GERALDINE_NAME } from "@/lib/chat/geraldine";
 import type { LangCode } from "@/lib/i18n/landing";
 import { normalizeExternalUrl, whatsAppWebUrl } from "@/lib/contact";
 
@@ -41,9 +43,11 @@ const UI: Record<
   {
     title: string;
     subtitle: string;
+    ctaHeadline: string;
+    ctaSubline: string;
+    aiBadge: string;
     placeholder: string;
     send: string;
-    open: string;
     close: string;
     turnsLeft: (n: number) => string;
     noTurns: string;
@@ -53,14 +57,17 @@ const UI: Record<
     contactLinkedIn: string;
     error: string;
     welcome: string;
+    thinking: string;
   }
 > = {
   es: {
-    title: "Asistente",
-    subtitle: "Pregunta sobre mi perfil",
+    title: GERALDINE_NAME,
+    subtitle: "Agente IA del portfolio",
+    ctaHeadline: "Pregúntale a Geraldine sobre Jhonny",
+    ctaSubline: "Experiencia, stack, estudios y más",
+    aiBadge: "Agente IA",
     placeholder: "Escribe tu pregunta...",
     send: "Enviar",
-    open: "¿Preguntas?",
     close: "Cerrar",
     turnsLeft: (n) => `${n} pregunta${n === 1 ? "" : "s"} restante${n === 1 ? "" : "s"}`,
     noTurns: "Has usado tus preguntas. Contáctame directamente:",
@@ -68,15 +75,19 @@ const UI: Record<
     contactEmail: "Correo",
     contactPhone: "Teléfono",
     contactLinkedIn: "LinkedIn",
-    error: "No pude responder. Intenta de nuevo o contáctame.",
-    welcome: "Hola, soy el asistente del portfolio. Puedo responder hasta 3 preguntas sobre mi experiencia, estudios, stack y proyectos.",
+    error: "Ups, no pude responder. Intenta de nuevo o contáctame directamente.",
+    welcome:
+      "¡Hola! Soy Geraldine, agente IA de este portfolio. Puedo contarte sobre la experiencia, estudios, stack y proyectos de Jhonny — hasta 3 preguntas.",
+    thinking: "Geraldine está pensando...",
   },
   en: {
-    title: "Assistant",
-    subtitle: "Ask about my profile",
+    title: GERALDINE_NAME,
+    subtitle: "Portfolio AI agent",
+    ctaHeadline: "Ask Geraldine about Jhonny",
+    ctaSubline: "Experience, stack, studies & more",
+    aiBadge: "AI Agent",
     placeholder: "Type your question...",
     send: "Send",
-    open: "Questions?",
     close: "Close",
     turnsLeft: (n) => `${n} question${n === 1 ? "" : "s"} left`,
     noTurns: "You've used your questions. Contact me directly:",
@@ -84,15 +95,19 @@ const UI: Record<
     contactEmail: "Email",
     contactPhone: "Phone",
     contactLinkedIn: "LinkedIn",
-    error: "I couldn't reply. Try again or contact me.",
-    welcome: "Hi, I'm the portfolio assistant. I can answer up to 3 questions about my experience, studies, tech stack, and projects.",
+    error: "Sorry, I couldn't reply. Try again or contact Jhonny directly.",
+    welcome:
+      "Hi! I'm Geraldine, the AI agent for this portfolio. I can tell you about Jhonny's experience, studies, stack and projects — up to 3 questions.",
+    thinking: "Geraldine is thinking...",
   },
   pt: {
-    title: "Assistente",
-    subtitle: "Pergunte sobre meu perfil",
+    title: GERALDINE_NAME,
+    subtitle: "Agente IA do portfólio",
+    ctaHeadline: "Pergunte à Geraldine sobre o Jhonny",
+    ctaSubline: "Experiência, stack, estudos e mais",
+    aiBadge: "Agente IA",
     placeholder: "Escreva sua pergunta...",
     send: "Enviar",
-    open: "Dúvidas?",
     close: "Fechar",
     turnsLeft: (n) => `${n} pergunta${n === 1 ? "" : "s"} restante${n === 1 ? "" : "s"}`,
     noTurns: "Você usou suas perguntas. Entre em contato diretamente:",
@@ -101,9 +116,28 @@ const UI: Record<
     contactPhone: "Telefone",
     contactLinkedIn: "LinkedIn",
     error: "Não consegui responder. Tente novamente ou entre em contato.",
-    welcome: "Olá, sou o assistente do portfólio. Posso responder até 3 perguntas sobre experiência, estudos, stack e projetos.",
+    welcome:
+      "Olá! Sou Geraldine, agente IA deste portfólio. Posso falar sobre a experiência, estudos, stack e projetos do Jhonny — até 3 perguntas.",
+    thinking: "Geraldine está pensando...",
   },
 };
+
+function GeraldineAvatar({ size = 40 }: { size?: number }) {
+  return (
+    <span
+      className="relative shrink-0 overflow-hidden rounded-full ring-2 ring-cyan-400/40 ring-offset-2 ring-offset-[#0a0a10]"
+      style={{ width: size, height: size }}
+    >
+      <Image
+        src={GERALDINE_AVATAR_URL}
+        alt={GERALDINE_NAME}
+        fill
+        className="object-cover"
+        sizes={`${size}px`}
+      />
+    </span>
+  );
+}
 
 function buildDirectContactLinks(
   profile: PersonalInfo | null | undefined,
@@ -242,18 +276,39 @@ export function PortfolioChat({ lang, profile }: Props) {
         <button
           type="button"
           onClick={openChat}
-          className="fixed bottom-6 right-6 z-40 rounded-full border border-cyan-400/30 bg-cyan-400/15 px-4 py-3 text-sm font-semibold text-cyan-100 shadow-lg shadow-cyan-500/20 backdrop-blur-sm transition hover:bg-cyan-400/25"
+          className="group fixed bottom-5 right-5 z-40 max-w-[min(340px,calc(100vw-2rem))] text-left transition hover:-translate-y-0.5"
         >
-          {t.open}
+          <span className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-r from-cyan-500/20 via-violet-500/15 to-emerald-500/20 opacity-70 blur-lg transition group-hover:opacity-100" />
+          <span className="relative flex items-center gap-3 overflow-hidden rounded-2xl border border-cyan-400/25 bg-[#0a0a10]/95 p-3 shadow-2xl shadow-cyan-500/15 backdrop-blur-md">
+            <GeraldineAvatar size={52} />
+            <span className="min-w-0 flex-1">
+              <span className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-violet-400/30 bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-200">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                {t.aiBadge}
+              </span>
+              <span className="mt-1 block text-sm font-bold leading-snug text-white group-hover:text-cyan-50">
+                {t.ctaHeadline}
+              </span>
+              <span className="mt-0.5 block text-xs text-white/55">{t.ctaSubline}</span>
+            </span>
+          </span>
         </button>
       )}
 
       {open && (
-        <div className="fixed bottom-6 right-6 z-40 flex h-[min(520px,80vh)] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a10]/95 shadow-2xl shadow-cyan-500/10 backdrop-blur-md">
+        <div className="fixed bottom-5 right-5 z-40 flex h-[min(520px,80vh)] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a10]/95 shadow-2xl shadow-cyan-500/10 backdrop-blur-md">
           <header className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-            <div>
-              <p className="font-semibold text-white">{t.title}</p>
-              <p className="text-xs text-white/50">{t.subtitle}</p>
+            <div className="flex items-center gap-3">
+              <GeraldineAvatar size={44} />
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-white">{t.title}</p>
+                  <span className="rounded-full border border-violet-400/25 bg-violet-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-violet-200">
+                    {t.aiBadge}
+                  </span>
+                </div>
+                <p className="text-xs text-white/50">{t.subtitle}</p>
+              </div>
             </div>
             <button
               type="button"
@@ -267,27 +322,35 @@ export function PortfolioChat({ lang, profile }: Props) {
           <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
             {messages.map((msg, index) => (
               <div key={index}>
-                <div
-                  className={`max-w-[90%] rounded-xl px-3 py-2 text-sm leading-6 ${
-                    msg.role === "user"
-                      ? "ml-auto bg-cyan-400/20 text-cyan-50"
-                      : "bg-white/5 text-white/80"
-                  }`}
-                >
-                  {msg.text}
-                </div>
-                {msg.role === "assistant" && msg.showContact && (
-                  <ChatContactLinks
-                    profile={profile}
-                    labels={t}
-                    prompt={turnsRemaining === 0 ? t.noTurns : t.contactPrompt}
-                  />
+                {msg.role === "assistant" ? (
+                  <div className="flex max-w-[92%] gap-2">
+                    <GeraldineAvatar size={28} />
+                    <div className="min-w-0 flex-1">
+                      <div className="rounded-xl rounded-tl-sm bg-white/5 px-3 py-2 text-sm leading-6 text-white/85">
+                        {msg.text}
+                      </div>
+                      {msg.showContact && (
+                        <ChatContactLinks
+                          profile={profile}
+                          labels={t}
+                          prompt={turnsRemaining === 0 ? t.noTurns : t.contactPrompt}
+                        />
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="ml-auto max-w-[88%] rounded-xl rounded-tr-sm bg-cyan-400/20 px-3 py-2 text-sm leading-6 text-cyan-50">
+                    {msg.text}
+                  </div>
                 )}
               </div>
             ))}
             {loading && (
-              <div className="max-w-[90%] rounded-xl bg-white/5 px-3 py-2 text-sm text-white/50">
-                ...
+              <div className="flex max-w-[92%] gap-2">
+                <GeraldineAvatar size={28} />
+                <div className="rounded-xl rounded-tl-sm bg-white/5 px-3 py-2 text-sm text-white/50">
+                  {t.thinking}
+                </div>
               </div>
             )}
           </div>
