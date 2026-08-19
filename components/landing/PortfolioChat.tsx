@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import type { PersonalInfo } from "@/lib/api/types";
 import { GERALDINE_AVATAR_URL, GERALDINE_NAME } from "@/lib/chat/geraldine";
 import type { LangCode } from "@/lib/i18n/landing";
@@ -338,7 +339,16 @@ export function PortfolioChat({ lang, profile }: Props) {
                     <GeraldineAvatar size={28} />
                     <div className="min-w-0 flex-1">
                       <div className="rounded-xl rounded-tl-sm bg-white/5 px-3 py-2 text-sm leading-6 text-white/85">
-                        {msg.text}
+                        <ReactMarkdown
+                          components={{
+                            p: ({ children }) => <p className="whitespace-pre-wrap">{children}</p>,
+                            strong: ({ children }) => (
+                              <strong className="font-semibold text-white">{children}</strong>
+                            ),
+                          }}
+                        >
+                          {msg.text}
+                        </ReactMarkdown>
                       </div>
                       {msg.showContact && (
                         <ChatContactLinks
