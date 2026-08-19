@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { PersonalInfo } from "@/lib/api/types";
 import { GERALDINE_AVATAR_URL, GERALDINE_NAME } from "@/lib/chat/geraldine";
 import type { LangCode } from "@/lib/i18n/landing";
@@ -211,6 +211,7 @@ export function PortfolioChat({ lang, profile }: Props) {
   const [loading, setLoading] = useState(false);
   const [turn, setTurn] = useState(0);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const t = UI[lang];
   const turnsRemaining = MAX_TURNS - turn;
@@ -222,6 +223,16 @@ export function PortfolioChat({ lang, profile }: Props) {
     }
     return -1;
   }, [messages]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const frame = requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [loading, messages, open]);
 
   function openChat() {
     setOpen(true);
@@ -353,6 +364,7 @@ export function PortfolioChat({ lang, profile }: Props) {
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           <footer className="border-t border-white/10 px-4 py-3">
