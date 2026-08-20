@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { Portfolio } from "@/lib/api/types";
+import type { Experience, Portfolio } from "@/lib/api/types";
 import {
   entityI18nKey,
   formatLocalizedPeriod,
@@ -45,6 +45,62 @@ function splitDescriptionBySentences(text: string): string[] {
     .map(ensurePeriod);
 }
 
+type ExperienceEntry = {
+  item: Experience;
+  company: string;
+  role: string;
+  description: string;
+};
+
+type ExperienceGroup = {
+  company: string;
+  entries: ExperienceEntry[];
+};
+
+function splitCompanyAndRole(company: string, role?: string | null) {
+  const normalizedCompany = company.trim();
+  const separatorIndex = normalizedCompany.search(/\s[-–—]\s/);
+  const inferredRole =
+    separatorIndex === -1 ? "" : normalizedCompany.slice(separatorIndex + 3).trim();
+
+  return {
+    company:
+      separatorIndex === -1 ? normalizedCompany : normalizedCompany.slice(0, separatorIndex).trim(),
+    role: role?.trim() || inferredRole,
+  };
+}
+
+function groupExperiences(
+  experience: Experience[],
+  messages: Record<string, string>,
+  lang: LangCode,
+): ExperienceGroup[] {
+  const groups = new Map<string, ExperienceGroup>();
+
+  for (const item of experience) {
+    const companyLabel = localizedEntityText(
+      messages,
+      entityI18nKey("experience", item.id, "company"),
+      lang,
+      item.company,
+    );
+    const { company, role } = splitCompanyAndRole(companyLabel, item.role);
+    const key = company.trim().toLocaleLowerCase();
+    const description = localizedEntityText(
+      messages,
+      entityI18nKey("experience", item.id, "description"),
+      lang,
+      item.description,
+    );
+    const group = groups.get(key) ?? { company, entries: [] };
+
+    group.entries.push({ item, company, role, description });
+    groups.set(key, group);
+  }
+
+  return [...groups.values()];
+}
+
 const EMPTY_LABEL: Record<LangCode, string> = {
   es: "Sin registros aún.",
   en: "No entries yet.",
@@ -73,40 +129,31 @@ export function SectionContent({
   }
 
   if (section === "experience") {
+    const experienceGroups = groupExperiences(portfolio.experience, messages, lang);
+
     return (
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-white">
           {orbLabel(lang, "experience", messages)}
         </h2>
         <div className="grid gap-3">
-          {portfolio.experience.length === 0 ? (
+          {experienceGroups.length === 0 ? (
             <p className="text-white/40">{EMPTY_LABEL[lang]}</p>
           ) : (
-            portfolio.experience.map((item) => {
-              const company = localizedEntityText(
-                messages,
-                entityI18nKey("experience", item.id, "company"),
-                lang,
-                item.company,
-              );
-              const description = localizedEntityText(
-                messages,
-                entityI18nKey("experience", item.id, "description"),
-                lang,
-                item.description,
-              );
-
+            experienceGroups.map((group) => {
+              const logoUrl = group.entries.find((entry) => entry.item.company_logo_url)
+                ?.item.company_logo_url;
               return (
                 <article
-                  key={item.id}
+                  key={group.company.toLocaleLowerCase()}
                   className="rounded-xl border border-white/10 bg-white/[0.03] p-4"
                 >
                   <div className="flex gap-4">
-                    {item.company_logo_url && (
+                    {logoUrl && (
                       <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
                         <Image
-                          src={item.company_logo_url}
-                          alt={company}
+                          src={logoUrl}
+                          alt={group.company}
                           fill
                           className="object-cover"
                           sizes="48px"
@@ -114,27 +161,41 @@ export function SectionContent({
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <h3 className="font-semibold text-white">{company}</h3>
-                        <p className="text-xs text-white/50">
-                          {formatLocalizedPeriod(
-                            lang,
-                            item.start_date,
-                            item.end_date,
-                            item.is_current,
-                          )}
-                        </p>
+                      <h3 className="font-semibold text-white">{group.company}</h3>
+                      <div className="mt-3 space-y-4">
+                        {group.entries.map((entry, index) => (
+                          <section
+                            key={entry.item.id}
+                            className={index === 0 ? "" : "border-t border-white/10 pt-4"}
+                          >
+                            <div className="flex flex-wrap items-start justify-between gap-2">
+                              {entry.role && (
+                                <h4 className="text-sm font-medium text-cyan-100">{entry.role}</h4>
+                              )}
+                              <p className="text-xs text-white/50">
+                                {formatLocalizedPeriod(
+                                  lang,
+                                  entry.item.start_date,
+                                  entry.item.end_date,
+                                  entry.item.is_current,
+                                )}
+                              </p>
+                            </div>
+                            {entry.description && (
+                              <ul className="mt-3 space-y-2 text-sm leading-6 text-white/70">
+                                {splitDescriptionBySentences(entry.description).map(
+                                  (sentence, descriptionIndex) => (
+                                    <li key={descriptionIndex} className="flex gap-2.5">
+                                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-cyan-400/80" />
+                                      <span>{sentence}</span>
+                                    </li>
+                                  ),
+                                )}
+                              </ul>
+                            )}
+                          </section>
+                        ))}
                       </div>
-                      {description && (
-                        <ul className="mt-3 space-y-2 text-sm leading-6 text-white/70">
-                          {splitDescriptionBySentences(description).map((sentence, index) => (
-                            <li key={index} className="flex gap-2.5">
-                              <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-cyan-400/80" />
-                              <span>{sentence}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
                     </div>
                   </div>
                 </article>
